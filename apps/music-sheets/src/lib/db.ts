@@ -18,6 +18,27 @@ function initDb() {
 
   // Create tables
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      name TEXT NOT NULL,
+      role TEXT DEFAULT 'user',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `)
+
+  db.exec(`
     CREATE TABLE IF NOT EXISTS music_sheets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -29,6 +50,7 @@ function initDb() {
       price REAL NOT NULL,
       description TEXT NOT NULL,
       pages INTEGER NOT NULL,
+      pdf_file_path TEXT,
       preview_url TEXT,
       cover_image_url TEXT,
       rating REAL DEFAULT 0,
@@ -40,10 +62,15 @@ function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
       customer_email TEXT NOT NULL,
+      customer_name TEXT,
       total REAL NOT NULL,
       status TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      payment_method TEXT,
+      payment_link TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `)
 
@@ -59,12 +86,57 @@ function initDb() {
     )
   `)
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS purchases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      sheet_id INTEGER NOT NULL,
+      order_id INTEGER NOT NULL,
+      purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (sheet_id) REFERENCES music_sheets(id),
+      FOREIGN KEY (order_id) REFERENCES orders(id)
+    )
+  `)
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      sheet_id INTEGER NOT NULL,
+      rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+      comment TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (sheet_id) REFERENCES music_sheets(id),
+      UNIQUE(user_id, sheet_id)
+    )
+  `)
+
   // Seed some data if empty
   const count = db.prepare('SELECT COUNT(*) as count FROM music_sheets').get() as { count: number }
+  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }
 
   if (count.count === 0) {
     seedData()
   }
+
+  if (userCount.count === 0) {
+    seedUsers()
+  }
+}
+
+function seedUsers() {
+  if (!db) return
+
+  // Create default admin user
+  // Password: admin123 (hashed with simple hash - in production use bcrypt)
+  const passwordHash = Buffer.from('admin123').toString('base64')
+
+  db.prepare(`
+    INSERT INTO users (email, password_hash, name, role)
+    VALUES (?, ?, ?, ?)
+  `).run('admin@musicsheets.com', passwordHash, 'Admin', 'admin')
 }
 
 function seedData() {

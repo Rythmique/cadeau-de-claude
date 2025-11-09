@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Star, Music, ShoppingCart, ArrowLeft } from 'lucide-react'
 import type { MusicSheet } from '@/types'
 import { useCart } from '@/lib/store'
+import ReviewSection from '@/components/ReviewSection'
 
 const difficultyLabels = {
   beginner: 'Débutant',
@@ -167,6 +168,9 @@ export default function SheetDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <ReviewSection sheetId={sheet.id} />
     </div>
   )
 }

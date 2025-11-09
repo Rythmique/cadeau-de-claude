@@ -10,6 +10,7 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCart()
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('card')
   const [processing, setProcessing] = useState(false)
 
   const total = getTotalPrice()
@@ -33,6 +34,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           customerEmail: email,
           customerName: name,
+          paymentMethod,
           items: items.map((item) => ({
             sheetId: item.sheetId,
             quantity: item.quantity,

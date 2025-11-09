@@ -2,10 +2,13 @@
 
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, Download, Home } from 'lucide-react'
+import { CheckCircle, Download, Home, CreditCard } from 'lucide-react'
 
 export default function OrderConfirmationPage() {
   const params = useParams()
+
+  // Payment link placeholder - will be replaced with actual payment link
+  const paymentLink = `https://payment-link-placeholder.com/pay/${params.id}`
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -17,6 +20,28 @@ export default function OrderConfirmationPage() {
         <p className="text-xl text-gray-600 mb-8">
           Merci pour votre achat. Votre commande #{params.id} a été traitée avec succès.
         </p>
+
+        {/* Payment Link Section */}
+        <div className="card p-6 mb-8 bg-blue-50 border border-blue-200">
+          <h3 className="text-lg font-bold mb-3 flex items-center justify-center">
+            <CreditCard className="mr-2" size={20} />
+            Lien de paiement
+          </h3>
+          <p className="text-sm text-gray-700 mb-4">
+            Complétez votre paiement en utilisant le lien ci-dessous:
+          </p>
+          <a
+            href={paymentLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary inline-block px-6 py-3"
+          >
+            Procéder au paiement
+          </a>
+          <p className="text-xs text-gray-600 mt-4">
+            Note: Ce lien sera remplacé par votre système de paiement réel (comme dans l'app Chiasma Android)
+          </p>
+        </div>
 
         <div className="card p-8 mb-8 text-left">
           <h2 className="text-2xl font-bold mb-4">Prochaines étapes</h2>
