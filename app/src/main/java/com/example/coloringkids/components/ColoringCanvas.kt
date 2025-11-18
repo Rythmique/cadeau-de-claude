@@ -9,12 +9,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 data class ColorableRegion(
     val id: Int,
@@ -53,11 +49,6 @@ fun ColoringCanvas(
                 }
             }
     ) {
-        val canvasWidth = size.width
-        val canvasHeight = size.height
-        val centerX = canvasWidth / 2f
-        val centerY = canvasHeight / 2f
-
         // Dessiner toutes les régions remplies
         regions.forEach { region ->
             drawPath(
@@ -71,10 +62,7 @@ fun ColoringCanvas(
             drawPath(
                 path = region.path,
                 color = Color.Black,
-                style = Stroke(
-                    width = 6f,
-                    pathEffect = PathEffect.cornerPathEffect(4f)
-                )
+                style = Stroke(width = 6f)
             )
         }
     }
@@ -124,7 +112,7 @@ fun createLetterRegions(letter: String): List<ColorableRegion> {
     }
 }
 
-// Lettre A - forme triangulaire avec barre horizontale
+// Lettre A
 fun createLetterA(cx: Float, cy: Float, scale: Float): List<ColorableRegion> {
     return listOf(
         // Jambe gauche
@@ -162,71 +150,28 @@ fun createLetterA(cx: Float, cy: Float, scale: Float): List<ColorableRegion> {
     )
 }
 
-// Lettre B - forme avec deux bosses
-fun createLetterB(cx: Float, cy: Float, scale: Float): List<ColorableRegion> {
-    return listOf(
-        // Barre verticale gauche
-        ColorableRegion(
-            id = 1,
-            path = Path().apply {
-                addRect(Rect(cx - 25 * scale, cy - 30 * scale, cx - 5 * scale, cy + 30 * scale))
-            },
-            bounds = Rect(cx - 25 * scale, cy - 30 * scale, cx - 5 * scale, cy + 30 * scale)
-        ),
-        // Bosse supérieure
-        ColorableRegion(
-            id = 2,
-            path = Path().apply {
-                addRoundRect(
-                    androidx.compose.ui.geometry.RoundRect(
-                        cx - 5 * scale, cy - 30 * scale, cx + 25 * scale, cy - 2 * scale,
-                        15f * scale, 15f * scale
-                    )
-                )
-            },
-            bounds = Rect(cx - 5 * scale, cy - 30 * scale, cx + 25 * scale, cy - 2 * scale)
-        ),
-        // Bosse inférieure
-        ColorableRegion(
-            id = 3,
-            path = Path().apply {
-                addRoundRect(
-                    androidx.compose.ui.geometry.RoundRect(
-                        cx - 5 * scale, cy + 2 * scale, cx + 28 * scale, cy + 30 * scale,
-                        15f * scale, 15f * scale
-                    )
-                )
-            },
-            bounds = Rect(cx - 5 * scale, cy + 2 * scale, cx + 28 * scale, cy + 30 * scale)
-        )
-    )
-}
+fun createLetterB(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
+    ColorableRegion(1, Path().apply {
+        addRect(Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale))
+    }, Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale)),
+    ColorableRegion(2, Path().apply {
+        addOval(Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy - 2*scale))
+    }, Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy - 2*scale)),
+    ColorableRegion(3, Path().apply {
+        addOval(Rect(cx - 5*scale, cy + 2*scale, cx + 28*scale, cy + 30*scale))
+    }, Rect(cx - 5*scale, cy + 2*scale, cx + 28*scale, cy + 30*scale))
+)
 
-// Lettre C - arc de cercle
-fun createLetterC(cx: Float, cy: Float, scale: Float): List<ColorableRegion> {
-    return listOf(
-        ColorableRegion(
-            id = 1,
-            path = Path().apply {
-                // Arc extérieur
-                addArc(
-                    Rect(cx - 30 * scale, cy - 30 * scale, cx + 30 * scale, cy + 30 * scale),
-                    startAngleDegrees = 45f,
-                    sweepAngleDegrees = 270f
-                )
-                // Arc intérieur (pour créer l'épaisseur)
-                addArc(
-                    Rect(cx - 15 * scale, cy - 15 * scale, cx + 15 * scale, cy + 15 * scale),
-                    startAngleDegrees = 45f,
-                    sweepAngleDegrees = 270f
-                )
-            },
-            bounds = Rect(cx - 30 * scale, cy - 30 * scale, cx + 30 * scale, cy + 30 * scale)
+fun createLetterC(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
+    ColorableRegion(1, Path().apply {
+        addArc(
+            Rect(cx - 30*scale, cy - 30*scale, cx + 30*scale, cy + 30*scale),
+            startAngleDegrees = 45f,
+            sweepAngleDegrees = 270f
         )
-    )
-}
+    }, Rect(cx - 30*scale, cy - 30*scale, cx + 30*scale, cy + 30*scale))
+)
 
-// Lettres simplifiées pour les autres (D-Z)
 fun createLetterD(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
     ColorableRegion(1, Path().apply {
         addRect(Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale))
@@ -263,11 +208,12 @@ fun createLetterF(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
     }, Rect(cx - 5*scale, cy - 7*scale, cx + 20*scale, cy + 7*scale))
 )
 
-fun createLetterG(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = createLetterC(cx, cy, scale) + listOf(
-    ColorableRegion(2, Path().apply {
-        addRect(Rect(cx + 10*scale, cy - 5*scale, cx + 30*scale, cy + 30*scale))
-    }, Rect(cx + 10*scale, cy - 5*scale, cx + 30*scale, cy + 30*scale))
-)
+fun createLetterG(cx: Float, cy: Float, scale: Float): List<ColorableRegion> =
+    createLetterC(cx, cy, scale) + listOf(
+        ColorableRegion(2, Path().apply {
+            addRect(Rect(cx + 10*scale, cy - 5*scale, cx + 30*scale, cy + 30*scale))
+        }, Rect(cx + 10*scale, cy - 5*scale, cx + 30*scale, cy + 30*scale))
+    )
 
 fun createLetterH(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
     ColorableRegion(1, Path().apply {
@@ -292,9 +238,7 @@ fun createLetterJ(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
         addRect(Rect(cx + 5*scale, cy - 30*scale, cx + 25*scale, cy + 20*scale))
     }, Rect(cx + 5*scale, cy - 30*scale, cx + 25*scale, cy + 20*scale)),
     ColorableRegion(2, Path().apply {
-        addRoundRect(androidx.compose.ui.geometry.RoundRect(
-            cx - 20*scale, cy + 10*scale, cx + 15*scale, cy + 30*scale, 15f*scale, 15f*scale
-        ))
+        addOval(Rect(cx - 20*scale, cy + 10*scale, cx + 15*scale, cy + 30*scale))
     }, Rect(cx - 20*scale, cy + 10*scale, cx + 15*scale, cy + 30*scale))
 )
 
@@ -377,9 +321,7 @@ fun createLetterP(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
         addRect(Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale))
     }, Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale)),
     ColorableRegion(2, Path().apply {
-        addRoundRect(androidx.compose.ui.geometry.RoundRect(
-            cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale, 15f*scale, 15f*scale
-        ))
+        addOval(Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale))
     }, Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale))
 )
 
@@ -399,9 +341,7 @@ fun createLetterR(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
         addRect(Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale))
     }, Rect(cx - 25*scale, cy - 30*scale, cx - 5*scale, cy + 30*scale)),
     ColorableRegion(2, Path().apply {
-        addRoundRect(androidx.compose.ui.geometry.RoundRect(
-            cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale, 15f*scale, 15f*scale
-        ))
+        addOval(Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale))
     }, Rect(cx - 5*scale, cy - 30*scale, cx + 25*scale, cy + 5*scale)),
     ColorableRegion(3, Path().apply {
         moveTo(cx + 5*scale, cy + 5*scale)
@@ -414,14 +354,10 @@ fun createLetterR(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
 
 fun createLetterS(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
     ColorableRegion(1, Path().apply {
-        addRoundRect(androidx.compose.ui.geometry.RoundRect(
-            cx - 25*scale, cy - 30*scale, cx + 25*scale, cy - 5*scale, 15f*scale, 15f*scale
-        ))
+        addOval(Rect(cx - 25*scale, cy - 30*scale, cx + 25*scale, cy - 5*scale))
     }, Rect(cx - 25*scale, cy - 30*scale, cx + 25*scale, cy - 5*scale)),
     ColorableRegion(2, Path().apply {
-        addRoundRect(androidx.compose.ui.geometry.RoundRect(
-            cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale, 15f*scale, 15f*scale
-        ))
+        addOval(Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale))
     }, Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale))
 )
 
@@ -436,26 +372,14 @@ fun createLetterT(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
 
 fun createLetterU(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
     ColorableRegion(1, Path().apply {
-        moveTo(cx - 30*scale, cy - 30*scale)
-        lineTo(cx - 10*scale, cy - 30*scale)
-        lineTo(cx - 10*scale, cy + 15*scale)
-        arcTo(Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale), 180f, 60f, false)
-        lineTo(cx - 25*scale, cy + 5*scale)
-        lineTo(cx - 30*scale, cy + 5*scale)
-        close()
-    }, Rect(cx - 30*scale, cy - 30*scale, cx - 10*scale, cy + 30*scale)),
+        addRect(Rect(cx - 30*scale, cy - 30*scale, cx - 10*scale, cy + 20*scale))
+    }, Rect(cx - 30*scale, cy - 30*scale, cx - 10*scale, cy + 20*scale)),
     ColorableRegion(2, Path().apply {
-        moveTo(cx + 10*scale, cy - 30*scale)
-        lineTo(cx + 30*scale, cy - 30*scale)
-        lineTo(cx + 30*scale, cy + 5*scale)
-        lineTo(cx + 25*scale, cy + 5*scale)
-        arcTo(Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale), 0f, -60f, false)
-        lineTo(cx + 10*scale, cy + 15*scale)
-        close()
-    }, Rect(cx + 10*scale, cy - 30*scale, cx + 30*scale, cy + 30*scale)),
+        addRect(Rect(cx + 10*scale, cy - 30*scale, cx + 30*scale, cy + 20*scale))
+    }, Rect(cx + 10*scale, cy - 30*scale, cx + 30*scale, cy + 20*scale)),
     ColorableRegion(3, Path().apply {
-        addArc(Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale), 120f, 300f)
-    }, Rect(cx - 25*scale, cy + 5*scale, cx + 25*scale, cy + 30*scale))
+        addOval(Rect(cx - 25*scale, cy + 10*scale, cx + 25*scale, cy + 30*scale))
+    }, Rect(cx - 25*scale, cy + 10*scale, cx + 25*scale, cy + 30*scale))
 )
 
 fun createLetterV(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
@@ -477,33 +401,25 @@ fun createLetterV(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
 
 fun createLetterW(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
     ColorableRegion(1, Path().apply {
-        moveTo(cx - 35*scale, cy - 30*scale)
-        lineTo(cx - 23*scale, cy - 30*scale)
-        lineTo(cx - 15*scale, cy + 30*scale)
-        lineTo(cx - 25*scale, cy + 30*scale)
-        close()
-    }, Rect(cx - 35*scale, cy - 30*scale, cx - 15*scale, cy + 30*scale)),
+        addRect(Rect(cx - 35*scale, cy - 30*scale, cx - 20*scale, cy + 30*scale))
+    }, Rect(cx - 35*scale, cy - 30*scale, cx - 20*scale, cy + 30*scale)),
     ColorableRegion(2, Path().apply {
-        moveTo(cx - 10*scale, cy - 30*scale)
-        lineTo(cx + 2*scale, cy - 30*scale)
-        lineTo(cx, cy + 15*scale)
-        lineTo(cx - 8*scale, cy + 15*scale)
+        moveTo(cx - 15*scale, cy - 30*scale)
+        lineTo(cx - 5*scale, cy - 30*scale)
+        lineTo(cx - 10*scale, cy + 15*scale)
+        lineTo(cx - 18*scale, cy + 15*scale)
         close()
-    }, Rect(cx - 10*scale, cy - 30*scale, cx + 2*scale, cy + 15*scale)),
+    }, Rect(cx - 18*scale, cy - 30*scale, cx - 5*scale, cy + 15*scale)),
     ColorableRegion(3, Path().apply {
-        moveTo(cx + 8*scale, cy - 30*scale)
-        lineTo(cx + 20*scale, cy - 30*scale)
+        moveTo(cx + 5*scale, cy - 30*scale)
+        lineTo(cx + 15*scale, cy - 30*scale)
         lineTo(cx + 18*scale, cy + 15*scale)
         lineTo(cx + 10*scale, cy + 15*scale)
         close()
-    }, Rect(cx + 8*scale, cy - 30*scale, cx + 20*scale, cy + 15*scale)),
+    }, Rect(cx + 5*scale, cy - 30*scale, cx + 18*scale, cy + 15*scale)),
     ColorableRegion(4, Path().apply {
-        moveTo(cx + 23*scale, cy - 30*scale)
-        lineTo(cx + 35*scale, cy - 30*scale)
-        lineTo(cx + 25*scale, cy + 30*scale)
-        lineTo(cx + 15*scale, cy + 30*scale)
-        close()
-    }, Rect(cx + 15*scale, cy - 30*scale, cx + 35*scale, cy + 30*scale))
+        addRect(Rect(cx + 20*scale, cy - 30*scale, cx + 35*scale, cy + 30*scale))
+    }, Rect(cx + 20*scale, cy - 30*scale, cx + 35*scale, cy + 30*scale))
 )
 
 fun createLetterX(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = listOf(
@@ -573,7 +489,7 @@ fun createLetterZ(cx: Float, cy: Float, scale: Float): List<ColorableRegion> = l
     }, Rect(cx - 30*scale, cy + 15*scale, cx + 30*scale, cy + 30*scale))
 )
 
-// ANIMAUX RÉALISTES
+// ANIMAUX
 
 fun createAnimalRegions(animalName: String): List<ColorableRegion> {
     val cx = 500f
@@ -583,223 +499,191 @@ fun createAnimalRegions(animalName: String): List<ColorableRegion> {
         "chat" -> createCat(cx, cy)
         "chien" -> createDog(cx, cy)
         "lion" -> createLion(cx, cy)
+        "tigre" -> createTiger(cx, cy)
         "ours" -> createBear(cx, cy)
+        "panda" -> createPanda(cx, cy)
         "lapin" -> createRabbit(cx, cy)
+        "renard" -> createFox(cx, cy)
+        "éléphant" -> createElephant(cx, cy)
+        "elephant" -> createElephant(cx, cy)
+        "girafe" -> createGiraffe(cx, cy)
+        "zèbre" -> createZebra(cx, cy)
+        "zebre" -> createZebra(cx, cy)
+        "singe" -> createMonkey(cx, cy)
         "poisson" -> createFish(cx, cy)
+        "dauphin" -> createDolphin(cx, cy)
+        "baleine" -> createWhale(cx, cy)
         "oiseau" -> createBird(cx, cy)
         "papillon" -> createButterfly(cx, cy)
-        else -> createCat(cx, cy) // Par défaut: chat
+        "abeille" -> createBee(cx, cy)
+        "grenouille" -> createFrog(cx, cy)
+        "tortue" -> createTurtle(cx, cy)
+        else -> createCat(cx, cy)
     }
 }
 
-// Chat mignon avec oreilles triangulaires
 fun createCat(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
-        // Tête ronde
+        // Tête
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 150f, cy - 200f, cx + 150f, cy + 100f))
         }, Rect(cx - 150f, cy - 200f, cx + 150f, cy + 100f)),
-
-        // Oreille gauche (triangle)
+        // Oreille gauche
         ColorableRegion(2, Path().apply {
             moveTo(cx - 120f, cy - 180f)
             lineTo(cx - 180f, cy - 300f)
             lineTo(cx - 60f, cy - 220f)
             close()
         }, Rect(cx - 180f, cy - 300f, cx - 60f, cy - 180f)),
-
-        // Oreille droite (triangle)
+        // Oreille droite
         ColorableRegion(3, Path().apply {
             moveTo(cx + 120f, cy - 180f)
             lineTo(cx + 180f, cy - 300f)
             lineTo(cx + 60f, cy - 220f)
             close()
         }, Rect(cx + 60f, cy - 300f, cx + 180f, cy - 180f)),
-
         // Corps
         ColorableRegion(4, Path().apply {
-            addRoundRect(androidx.compose.ui.geometry.RoundRect(
-                cx - 120f, cy + 80f, cx + 120f, cy + 350f, 40f, 40f
-            ))
+            addOval(Rect(cx - 120f, cy + 80f, cx + 120f, cy + 350f))
         }, Rect(cx - 120f, cy + 80f, cx + 120f, cy + 350f)),
-
-        // Patte avant gauche
+        // Patte gauche
         ColorableRegion(5, Path().apply {
-            addRoundRect(androidx.compose.ui.geometry.RoundRect(
-                cx - 100f, cy + 320f, cx - 50f, cy + 480f, 20f, 20f
-            ))
+            addRect(Rect(cx - 100f, cy + 320f, cx - 50f, cy + 480f))
         }, Rect(cx - 100f, cy + 320f, cx - 50f, cy + 480f)),
-
-        // Patte avant droite
+        // Patte droite
         ColorableRegion(6, Path().apply {
-            addRoundRect(androidx.compose.ui.geometry.RoundRect(
-                cx + 50f, cy + 320f, cx + 100f, cy + 480f, 20f, 20f
-            ))
+            addRect(Rect(cx + 50f, cy + 320f, cx + 100f, cy + 480f))
         }, Rect(cx + 50f, cy + 320f, cx + 100f, cy + 480f)),
-
         // Queue
         ColorableRegion(7, Path().apply {
             moveTo(cx + 100f, cy + 300f)
-            quadraticTo(cx + 200f, cy + 250f, cx + 180f, cy + 150f)
-            quadraticTo(cx + 220f, cy + 250f, cx + 120f, cy + 300f)
+            lineTo(cx + 200f, cy + 250f)
+            lineTo(cx + 180f, cy + 150f)
+            lineTo(cx + 120f, cy + 290f)
             close()
-        }, Rect(cx + 100f, cy + 150f, cx + 220f, cy + 300f))
+        }, Rect(cx + 100f, cy + 150f, cx + 200f, cy + 300f))
     )
 }
 
-// Chien avec museau
 fun createDog(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
         // Tête
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 130f, cy - 180f, cx + 130f, cy + 80f))
         }, Rect(cx - 130f, cy - 180f, cx + 130f, cy + 80f)),
-
-        // Oreille gauche tombante
+        // Oreille gauche
         ColorableRegion(2, Path().apply {
             addOval(Rect(cx - 180f, cy - 150f, cx - 100f, cy + 50f))
         }, Rect(cx - 180f, cy - 150f, cx - 100f, cy + 50f)),
-
-        // Oreille droite tombante
+        // Oreille droite
         ColorableRegion(3, Path().apply {
             addOval(Rect(cx + 100f, cy - 150f, cx + 180f, cy + 50f))
         }, Rect(cx + 100f, cy - 150f, cx + 180f, cy + 50f)),
-
         // Museau
         ColorableRegion(4, Path().apply {
             addOval(Rect(cx - 70f, cy + 20f, cx + 70f, cy + 140f))
         }, Rect(cx - 70f, cy + 20f, cx + 70f, cy + 140f)),
-
         // Corps
         ColorableRegion(5, Path().apply {
             addOval(Rect(cx - 150f, cy + 100f, cx + 150f, cy + 400f))
         }, Rect(cx - 150f, cy + 100f, cx + 150f, cy + 400f)),
-
-        // Patte avant gauche
+        // Pattes
         ColorableRegion(6, Path().apply {
             addRect(Rect(cx - 120f, cy + 360f, cx - 70f, cy + 500f))
         }, Rect(cx - 120f, cy + 360f, cx - 70f, cy + 500f)),
-
-        // Patte avant droite
         ColorableRegion(7, Path().apply {
             addRect(Rect(cx + 70f, cy + 360f, cx + 120f, cy + 500f))
-        }, Rect(cx + 70f, cy + 360f, cx + 120f, cy + 500f)),
-
-        // Queue dressée
-        ColorableRegion(8, Path().apply {
-            moveTo(cx + 130f, cy + 350f)
-            quadraticTo(cx + 200f, cy + 200f, cx + 180f, cy + 100f)
-            lineTo(cx + 160f, cy + 110f)
-            quadraticTo(cx + 170f, cy + 210f, cx + 110f, cy + 360f)
-            close()
-        }, Rect(cx + 110f, cy + 100f, cx + 200f, cy + 360f))
+        }, Rect(cx + 70f, cy + 360f, cx + 120f, cy + 500f))
     )
 }
 
-// Lion avec crinière
 fun createLion(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
-        // Crinière (grand cercle autour de la tête)
+        // Crinière
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 200f, cy - 250f, cx + 200f, cy + 150f))
         }, Rect(cx - 200f, cy - 250f, cx + 200f, cy + 150f)),
-
-        // Tête (plus petite)
+        // Tête
         ColorableRegion(2, Path().apply {
             addOval(Rect(cx - 120f, cy - 180f, cx + 120f, cy + 80f))
         }, Rect(cx - 120f, cy - 180f, cx + 120f, cy + 80f)),
-
         // Corps
         ColorableRegion(3, Path().apply {
             addOval(Rect(cx - 140f, cy + 60f, cx + 140f, cy + 380f))
         }, Rect(cx - 140f, cy + 60f, cx + 140f, cy + 380f)),
-
-        // Pattes (4)
+        // Pattes
         ColorableRegion(4, Path().apply {
             addRect(Rect(cx - 120f, cy + 350f, cx - 70f, cy + 480f))
         }, Rect(cx - 120f, cy + 350f, cx - 70f, cy + 480f)),
-
         ColorableRegion(5, Path().apply {
             addRect(Rect(cx + 70f, cy + 350f, cx + 120f, cy + 480f))
         }, Rect(cx + 70f, cy + 350f, cx + 120f, cy + 480f)),
-
-        // Queue avec touffe
+        // Queue
         ColorableRegion(6, Path().apply {
             moveTo(cx + 130f, cy + 340f)
             lineTo(cx + 140f, cy + 340f)
             lineTo(cx + 200f, cy + 450f)
-            // Touffe au bout
-            addOval(Rect(cx + 180f, cy + 430f, cx + 220f, cy + 470f))
-        }, Rect(cx + 130f, cy + 340f, cx + 220f, cy + 470f))
+            lineTo(cx + 190f, cy + 450f)
+            close()
+        }, Rect(cx + 130f, cy + 340f, cx + 200f, cy + 450f))
     )
 }
 
-// Ours
+fun createTiger(cx: Float, cy: Float) = createCat(cx, cy)
+fun createPanda(cx: Float, cy: Float) = createBear(cx, cy)
+fun createFox(cx: Float, cy: Float) = createDog(cx, cy)
+
 fun createBear(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
         // Tête
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 140f, cy - 190f, cx + 140f, cy + 90f))
         }, Rect(cx - 140f, cy - 190f, cx + 140f, cy + 90f)),
-
-        // Oreille gauche (ronde)
+        // Oreilles
         ColorableRegion(2, Path().apply {
             addOval(Rect(cx - 160f, cy - 250f, cx - 80f, cy - 170f))
         }, Rect(cx - 160f, cy - 250f, cx - 80f, cy - 170f)),
-
-        // Oreille droite (ronde)
         ColorableRegion(3, Path().apply {
             addOval(Rect(cx + 80f, cy - 250f, cx + 160f, cy - 170f))
         }, Rect(cx + 80f, cy - 250f, cx + 160f, cy - 170f)),
-
-        // Corps large
+        // Corps
         ColorableRegion(4, Path().apply {
             addOval(Rect(cx - 160f, cy + 60f, cx + 160f, cy + 400f))
         }, Rect(cx - 160f, cy + 60f, cx + 160f, cy + 400f)),
-
-        // Pattes (larges)
+        // Pattes
         ColorableRegion(5, Path().apply {
             addRect(Rect(cx - 140f, cy + 360f, cx - 70f, cy + 500f))
         }, Rect(cx - 140f, cy + 360f, cx - 70f, cy + 500f)),
-
         ColorableRegion(6, Path().apply {
             addRect(Rect(cx + 70f, cy + 360f, cx + 140f, cy + 500f))
         }, Rect(cx + 70f, cy + 360f, cx + 140f, cy + 500f))
     )
 }
 
-// Lapin avec longues oreilles
 fun createRabbit(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
         // Tête
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 120f, cy - 160f, cx + 120f, cy + 80f))
         }, Rect(cx - 120f, cy - 160f, cx + 120f, cy + 80f)),
-
-        // Oreille gauche (longue)
+        // Longues oreilles
         ColorableRegion(2, Path().apply {
             addOval(Rect(cx - 100f, cy - 450f, cx - 40f, cy - 140f))
         }, Rect(cx - 100f, cy - 450f, cx - 40f, cy - 140f)),
-
-        // Oreille droite (longue)
         ColorableRegion(3, Path().apply {
             addOval(Rect(cx + 40f, cy - 450f, cx + 100f, cy - 140f))
         }, Rect(cx + 40f, cy - 450f, cx + 100f, cy - 140f)),
-
-        // Corps rond
+        // Corps
         ColorableRegion(4, Path().apply {
             addOval(Rect(cx - 140f, cy + 60f, cx + 140f, cy + 350f))
         }, Rect(cx - 140f, cy + 60f, cx + 140f, cy + 350f)),
-
-        // Pattes arrières
+        // Pattes
         ColorableRegion(5, Path().apply {
             addOval(Rect(cx - 130f, cy + 320f, cx - 40f, cy + 450f))
         }, Rect(cx - 130f, cy + 320f, cx - 40f, cy + 450f)),
-
         ColorableRegion(6, Path().apply {
             addOval(Rect(cx + 40f, cy + 320f, cx + 130f, cy + 450f))
         }, Rect(cx + 40f, cy + 320f, cx + 130f, cy + 450f)),
-
         // Queue pompom
         ColorableRegion(7, Path().apply {
             addOval(Rect(cx + 110f, cy + 250f, cx + 180f, cy + 320f))
@@ -807,14 +691,70 @@ fun createRabbit(cx: Float, cy: Float): List<ColorableRegion> {
     )
 }
 
-// Poisson
+fun createElephant(cx: Float, cy: Float): List<ColorableRegion> {
+    return listOf(
+        // Tête
+        ColorableRegion(1, Path().apply {
+            addOval(Rect(cx - 160f, cy - 200f, cx + 160f, cy + 100f))
+        }, Rect(cx - 160f, cy - 200f, cx + 160f, cy + 100f)),
+        // Oreilles
+        ColorableRegion(2, Path().apply {
+            addOval(Rect(cx - 230f, cy - 180f, cx - 140f, cy + 80f))
+        }, Rect(cx - 230f, cy - 180f, cx - 140f, cy + 80f)),
+        ColorableRegion(3, Path().apply {
+            addOval(Rect(cx + 140f, cy - 180f, cx + 230f, cy + 80f))
+        }, Rect(cx + 140f, cy - 180f, cx + 230f, cy + 80f)),
+        // Trompe
+        ColorableRegion(4, Path().apply {
+            addRect(Rect(cx - 40f, cy + 80f, cx + 40f, cy + 350f))
+        }, Rect(cx - 40f, cy + 80f, cx + 40f, cy + 350f)),
+        // Corps
+        ColorableRegion(5, Path().apply {
+            addOval(Rect(cx - 180f, cy + 50f, cx + 180f, cy + 400f))
+        }, Rect(cx - 180f, cy + 50f, cx + 180f, cy + 400f)),
+        // Pattes
+        ColorableRegion(6, Path().apply {
+            addRect(Rect(cx - 150f, cy + 380f, cx - 100f, cy + 530f))
+        }, Rect(cx - 150f, cy + 380f, cx - 100f, cy + 530f)),
+        ColorableRegion(7, Path().apply {
+            addRect(Rect(cx + 100f, cy + 380f, cx + 150f, cy + 530f))
+        }, Rect(cx + 100f, cy + 380f, cx + 150f, cy + 530f))
+    )
+}
+
+fun createGiraffe(cx: Float, cy: Float): List<ColorableRegion> {
+    return listOf(
+        // Tête
+        ColorableRegion(1, Path().apply {
+            addOval(Rect(cx - 80f, cy - 500f, cx + 80f, cy - 400f))
+        }, Rect(cx - 80f, cy - 500f, cx + 80f, cy - 400f)),
+        // Long cou
+        ColorableRegion(2, Path().apply {
+            addRect(Rect(cx - 50f, cy - 400f, cx + 50f, cy + 50f))
+        }, Rect(cx - 50f, cy - 400f, cx + 50f, cy + 50f)),
+        // Corps
+        ColorableRegion(3, Path().apply {
+            addOval(Rect(cx - 140f, cy + 20f, cx + 140f, cy + 320f))
+        }, Rect(cx - 140f, cy + 20f, cx + 140f, cy + 320f)),
+        // Pattes longues
+        ColorableRegion(4, Path().apply {
+            addRect(Rect(cx - 120f, cy + 300f, cx - 80f, cy + 550f))
+        }, Rect(cx - 120f, cy + 300f, cx - 80f, cy + 550f)),
+        ColorableRegion(5, Path().apply {
+            addRect(Rect(cx + 80f, cy + 300f, cx + 120f, cy + 550f))
+        }, Rect(cx + 80f, cy + 300f, cx + 120f, cy + 550f))
+    )
+}
+
+fun createZebra(cx: Float, cy: Float) = createDog(cx, cy)
+fun createMonkey(cx: Float, cy: Float) = createCat(cx, cy)
+
 fun createFish(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
         // Corps
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 180f, cy - 100f, cx + 80f, cy + 100f))
         }, Rect(cx - 180f, cy - 100f, cx + 80f, cy + 100f)),
-
         // Nageoire dorsale
         ColorableRegion(2, Path().apply {
             moveTo(cx - 80f, cy - 100f)
@@ -822,7 +762,6 @@ fun createFish(cx: Float, cy: Float): List<ColorableRegion> {
             lineTo(cx + 20f, cy - 90f)
             close()
         }, Rect(cx - 80f, cy - 200f, cx + 20f, cy - 90f)),
-
         // Queue
         ColorableRegion(3, Path().apply {
             moveTo(cx + 80f, cy - 50f)
@@ -831,7 +770,6 @@ fun createFish(cx: Float, cy: Float): List<ColorableRegion> {
             lineTo(cx + 80f, cy + 50f)
             close()
         }, Rect(cx + 80f, cy - 120f, cx + 200f, cy + 120f)),
-
         // Nageoire ventrale
         ColorableRegion(4, Path().apply {
             moveTo(cx - 60f, cy + 100f)
@@ -842,35 +780,35 @@ fun createFish(cx: Float, cy: Float): List<ColorableRegion> {
     )
 }
 
-// Oiseau
+fun createDolphin(cx: Float, cy: Float) = createFish(cx, cy)
+fun createWhale(cx: Float, cy: Float) = createFish(cx, cy)
+
 fun createBird(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
         // Corps
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 100f, cy - 50f, cx + 100f, cy + 150f))
         }, Rect(cx - 100f, cy - 50f, cx + 100f, cy + 150f)),
-
         // Tête
         ColorableRegion(2, Path().apply {
             addOval(Rect(cx - 80f, cy - 180f, cx + 80f, cy - 20f))
         }, Rect(cx - 80f, cy - 180f, cx + 80f, cy - 20f)),
-
         // Aile gauche
         ColorableRegion(3, Path().apply {
             moveTo(cx - 100f, cy + 30f)
-            quadraticTo(cx - 250f, cy, cx - 200f, cy + 150f)
+            lineTo(cx - 250f, cy)
+            lineTo(cx - 200f, cy + 150f)
             lineTo(cx - 80f, cy + 100f)
             close()
         }, Rect(cx - 250f, cy, cx - 80f, cy + 150f)),
-
         // Aile droite
         ColorableRegion(4, Path().apply {
             moveTo(cx + 100f, cy + 30f)
-            quadraticTo(cx + 250f, cy, cx + 200f, cy + 150f)
+            lineTo(cx + 250f, cy)
+            lineTo(cx + 200f, cy + 150f)
             lineTo(cx + 80f, cy + 100f)
             close()
         }, Rect(cx + 80f, cy, cx + 250f, cy + 150f)),
-
         // Bec
         ColorableRegion(5, Path().apply {
             moveTo(cx, cy - 90f)
@@ -878,7 +816,6 @@ fun createBird(cx: Float, cy: Float): List<ColorableRegion> {
             lineTo(cx + 20f, cy - 70f)
             close()
         }, Rect(cx, cy - 100f, cx + 80f, cy - 70f)),
-
         // Queue
         ColorableRegion(6, Path().apply {
             moveTo(cx - 30f, cy + 150f)
@@ -890,62 +827,108 @@ fun createBird(cx: Float, cy: Float): List<ColorableRegion> {
     )
 }
 
-// Papillon
 fun createButterfly(cx: Float, cy: Float): List<ColorableRegion> {
     return listOf(
-        // Corps central
+        // Corps
         ColorableRegion(1, Path().apply {
             addOval(Rect(cx - 30f, cy - 150f, cx + 30f, cy + 150f))
         }, Rect(cx - 30f, cy - 150f, cx + 30f, cy + 150f)),
-
         // Aile supérieure gauche
         ColorableRegion(2, Path().apply {
             moveTo(cx - 30f, cy - 100f)
-            quadraticTo(cx - 200f, cy - 250f, cx - 180f, cy - 50f)
-            quadraticTo(cx - 100f, cy - 80f, cx - 30f, cy - 50f)
+            lineTo(cx - 200f, cy - 250f)
+            lineTo(cx - 180f, cy - 50f)
+            lineTo(cx - 30f, cy - 50f)
             close()
         }, Rect(cx - 200f, cy - 250f, cx - 30f, cy - 50f)),
-
         // Aile supérieure droite
         ColorableRegion(3, Path().apply {
             moveTo(cx + 30f, cy - 100f)
-            quadraticTo(cx + 200f, cy - 250f, cx + 180f, cy - 50f)
-            quadraticTo(cx + 100f, cy - 80f, cx + 30f, cy - 50f)
+            lineTo(cx + 200f, cy - 250f)
+            lineTo(cx + 180f, cy - 50f)
+            lineTo(cx + 30f, cy - 50f)
             close()
         }, Rect(cx + 30f, cy - 250f, cx + 200f, cy - 50f)),
-
         // Aile inférieure gauche
         ColorableRegion(4, Path().apply {
             moveTo(cx - 30f, cy + 50f)
-            quadraticTo(cx - 150f, cy + 200f, cx - 120f, cy + 80f)
-            quadraticTo(cx - 70f, cy + 100f, cx - 30f, cy + 100f)
+            lineTo(cx - 150f, cy + 200f)
+            lineTo(cx - 120f, cy + 80f)
+            lineTo(cx - 30f, cy + 100f)
             close()
         }, Rect(cx - 150f, cy + 50f, cx - 30f, cy + 200f)),
-
         // Aile inférieure droite
         ColorableRegion(5, Path().apply {
             moveTo(cx + 30f, cy + 50f)
-            quadraticTo(cx + 150f, cy + 200f, cx + 120f, cy + 80f)
-            quadraticTo(cx + 70f, cy + 100f, cx + 30f, cy + 100f)
+            lineTo(cx + 150f, cy + 200f)
+            lineTo(cx + 120f, cy + 80f)
+            lineTo(cx + 30f, cy + 100f)
             close()
-        }, Rect(cx + 30f, cy + 50f, cx + 150f, cy + 200f)),
+        }, Rect(cx + 30f, cy + 50f, cx + 150f, cy + 200f))
+    )
+}
 
-        // Antennes gauche
+fun createBee(cx: Float, cy: Float) = createButterfly(cx, cy)
+
+fun createFrog(cx: Float, cy: Float): List<ColorableRegion> {
+    return listOf(
+        // Corps
+        ColorableRegion(1, Path().apply {
+            addOval(Rect(cx - 140f, cy - 120f, cx + 140f, cy + 150f))
+        }, Rect(cx - 140f, cy - 120f, cx + 140f, cy + 150f)),
+        // Tête/Yeux
+        ColorableRegion(2, Path().apply {
+            addOval(Rect(cx - 100f, cy - 200f, cx - 40f, cy - 100f))
+        }, Rect(cx - 100f, cy - 200f, cx - 40f, cy - 100f)),
+        ColorableRegion(3, Path().apply {
+            addOval(Rect(cx + 40f, cy - 200f, cx + 100f, cy - 100f))
+        }, Rect(cx + 40f, cy - 200f, cx + 100f, cy - 100f)),
+        // Pattes avant
+        ColorableRegion(4, Path().apply {
+            addOval(Rect(cx - 180f, cy, cx - 120f, cy + 100f))
+        }, Rect(cx - 180f, cy, cx - 120f, cy + 100f)),
+        ColorableRegion(5, Path().apply {
+            addOval(Rect(cx + 120f, cy, cx + 180f, cy + 100f))
+        }, Rect(cx + 120f, cy, cx + 180f, cy + 100f)),
+        // Pattes arrières
         ColorableRegion(6, Path().apply {
-            moveTo(cx - 20f, cy - 150f)
-            quadraticTo(cx - 50f, cy - 200f, cx - 40f, cy - 220f)
-            lineTo(cx - 30f, cy - 210f)
-            quadraticTo(cx - 35f, cy - 190f, cx - 15f, cy - 145f)
-            close()
-        }, Rect(cx - 50f, cy - 220f, cx - 15f, cy - 145f)),
-
-        // Antennes droite
+            addOval(Rect(cx - 200f, cy + 120f, cx - 100f, cy + 200f))
+        }, Rect(cx - 200f, cy + 120f, cx - 100f, cy + 200f)),
         ColorableRegion(7, Path().apply {
-            moveTo(cx + 20f, cy - 150f)
-            quadraticTo(cx + 50f, cy - 200f, cx + 40f, cy - 220f)
-            lineTo(cx + 30f, cy - 210f)
-            quadraticTo(cx + 35f, cy - 190f, cx + 15f, cy - 145f)
+            addOval(Rect(cx + 100f, cy + 120f, cx + 200f, cy + 200f))
+        }, Rect(cx + 100f, cy + 120f, cx + 200f, cy + 200f))
+    )
+}
+
+fun createTurtle(cx: Float, cy: Float): List<ColorableRegion> {
+    return listOf(
+        // Carapace
+        ColorableRegion(1, Path().apply {
+            addOval(Rect(cx - 160f, cy - 100f, cx + 160f, cy + 200f))
+        }, Rect(cx - 160f, cy - 100f, cx + 160f, cy + 200f)),
+        // Tête
+        ColorableRegion(2, Path().apply {
+            addOval(Rect(cx - 80f, cy - 200f, cx + 80f, cy - 80f))
+        }, Rect(cx - 80f, cy - 200f, cx + 80f, cy - 80f)),
+        // Pattes
+        ColorableRegion(3, Path().apply {
+            addOval(Rect(cx - 180f, cy - 50f, cx - 140f, cy + 50f))
+        }, Rect(cx - 180f, cy - 50f, cx - 140f, cy + 50f)),
+        ColorableRegion(4, Path().apply {
+            addOval(Rect(cx + 140f, cy - 50f, cx + 180f, cy + 50f))
+        }, Rect(cx + 140f, cy - 50f, cx + 180f, cy + 50f)),
+        ColorableRegion(5, Path().apply {
+            addOval(Rect(cx - 180f, cy + 120f, cx - 140f, cy + 220f))
+        }, Rect(cx - 180f, cy + 120f, cx - 140f, cy + 220f)),
+        ColorableRegion(6, Path().apply {
+            addOval(Rect(cx + 140f, cy + 120f, cx + 180f, cy + 220f))
+        }, Rect(cx + 140f, cy + 120f, cx + 180f, cy + 220f)),
+        // Queue
+        ColorableRegion(7, Path().apply {
+            moveTo(cx, cy + 200f)
+            lineTo(cx - 20f, cy + 280f)
+            lineTo(cx + 20f, cy + 280f)
             close()
-        }, Rect(cx + 15f, cy - 220f, cx + 50f, cy - 145f))
+        }, Rect(cx - 20f, cy + 200f, cx + 20f, cy + 280f))
     )
 }
