@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Coloriage Enfants</string>
+    <string name="alphabet">Alphabet</string>
+    <string name="animals">Animaux</string>
+    <string name="choose_category">Choisis une catégorie</string>
+    <string name="back">Retour</string>
+    <string name="clear">Effacer</string>
+</resources>
