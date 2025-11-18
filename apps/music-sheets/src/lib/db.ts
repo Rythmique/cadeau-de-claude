@@ -297,9 +297,9 @@ export function getAllSheets(): MusicSheet[] {
   const sheets = db.prepare(`
     SELECT
       id, title, composer, arranger, genre, difficulty, instrument,
-      price, description, pages, preview_url as previewUrl,
-      cover_image_url as coverImageUrl, rating, review_count as reviewCount,
-      created_at as createdAt
+      price, description, pages, pdf_file_path as pdfFilePath,
+      preview_url as previewUrl, cover_image_url as coverImageUrl,
+      rating, review_count as reviewCount, created_at as createdAt
     FROM music_sheets
     ORDER BY created_at DESC
   `).all()
@@ -312,9 +312,9 @@ export function getSheetById(id: number): MusicSheet | undefined {
   const sheet = db.prepare(`
     SELECT
       id, title, composer, arranger, genre, difficulty, instrument,
-      price, description, pages, preview_url as previewUrl,
-      cover_image_url as coverImageUrl, rating, review_count as reviewCount,
-      created_at as createdAt
+      price, description, pages, pdf_file_path as pdfFilePath,
+      preview_url as previewUrl, cover_image_url as coverImageUrl,
+      rating, review_count as reviewCount, created_at as createdAt
     FROM music_sheets
     WHERE id = ?
   `).get(id)
@@ -334,9 +334,9 @@ export function searchSheets(query: string, filters?: {
   let sql = `
     SELECT
       id, title, composer, arranger, genre, difficulty, instrument,
-      price, description, pages, preview_url as previewUrl,
-      cover_image_url as coverImageUrl, rating, review_count as reviewCount,
-      created_at as createdAt
+      price, description, pages, pdf_file_path as pdfFilePath,
+      preview_url as previewUrl, cover_image_url as coverImageUrl,
+      rating, review_count as reviewCount, created_at as createdAt
     FROM music_sheets
     WHERE 1=1
   `

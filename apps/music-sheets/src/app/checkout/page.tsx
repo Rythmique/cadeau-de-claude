@@ -16,8 +16,12 @@ export default function CheckoutPage() {
   const total = getTotalPrice()
   const totalWithTax = total * 1.2
 
-  if (items.length === 0) {
+  if (typeof window !== 'undefined' && items.length === 0) {
     router.push('/cart')
+    return null
+  }
+
+  if (items.length === 0) {
     return null
   }
 

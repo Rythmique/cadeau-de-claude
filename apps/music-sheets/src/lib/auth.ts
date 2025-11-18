@@ -10,7 +10,7 @@ function verifyPassword(password: string, hash: string): boolean {
   return hashPassword(password) === hash
 }
 
-export function createUser(email: string, password: string, name: string, role: string = 'user'): User | null {
+export function createUser(email: string, password: string, name: string, role: 'user' | 'admin' = 'user'): User | null {
   try {
     const db = getDb()
     const passwordHash = hashPassword(password)

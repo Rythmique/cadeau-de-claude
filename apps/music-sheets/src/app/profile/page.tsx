@@ -23,10 +23,14 @@ export default function ProfilePage() {
         const data = await response.json()
         setUser(data.user)
       } else {
-        window.location.href = '/login'
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login'
+        }
       }
     } catch (error) {
-      window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
     } finally {
       setLoading(false)
     }
